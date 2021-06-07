@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <style>
+
+    img {
+      width: 100%;
+      height: auto;
+      vertical-align: bottom;
+    }
+
+    .js-slider {
+      width: 1000px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .js-carousel {
+      margin: 0 auto;
+    }
+
+    .js-carousel_item {
+      height: 70px;
+    }
+
+    /*----------------------------------------*/
+
+    .js-carousel {
+      overflow: hidden;
+    }
+
+    .js-slider {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .js-slider_item {
+      position: relative;
+      width: 100%;
+      opacity: 0;
+      transition: opacity 1s ease-out;
+    }
+
+    .js-slider_item:not(:first-of-type) {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .js-slider_item.is-current {
+      z-index: 100;
+      opacity: 1;
+    }
+
+    .js-carousel_list {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .js-carousel_item {
+      flex-shrink: 0;
+    }
+
+  </style>
+
+
+
+  <div class="js-slider">
+    <div class="js-slider_item"><img src="https://placehold.jp/ff0000/ffffff/1000x350.png?text=1" alt=""></div>
+    <div class="js-slider_item"><img src="https://placehold.jp/3d4070/ffffff/1000x350.png?text=2" alt=""></div>
+    <div class="js-slider_item is-current"><img src="https://placehold.jp/b4de35/ffffff/1000x350.png?text=3" alt=""></div>
+    <div class="js-slider_item"><img src="https://placehold.jp/33ded3/ffffff/1000x350.png?text=4" alt=""></div>
+    <div class="js-slider_item"><img src="https://placehold.jp/ff0000/ffffff/1000x350.png?text=5" alt=""></div>
+    <div class="js-slider_item"><img src="https://placehold.jp/fa28f0/ffffff/1000x350.png?text=6" alt=""></div>
+    <div class="js-slider_item"><img src="https://placehold.jp/3d4070/ffffff/1000x350.png?text=7" alt=""></div>
+    <div class="js-slider_item"><img src="https://placehold.jp/fa992a/ffffff/1000x350.png?text=8" alt=""></div>
+  </div>
+
+  <div class="js-carousel">
+    <div class="js-carousel_list">
+      <div data-carousel="1" class="js-carousel_item"><img src="https://placehold.jp/ff0000/ffffff/1000x350.png?text=1" alt=""></div>
+      <div data-carousel="2" class="js-carousel_item"><img src="https://placehold.jp/3d4070/ffffff/1000x350.png?text=2" alt=""></div>
+      <div data-carousel="3" class="js-carousel_item is-current"><img src="https://placehold.jp/b4de35/ffffff/1000x350.png?text=3" alt=""></div>
+      <div data-carousel="4" class="js-carousel_item"><img src="https://placehold.jp/33ded3/ffffff/1000x350.png?text=4" alt=""></div>
+      <div data-carousel="5" class="js-carousel_item"><img src="https://placehold.jp/ff0000/ffffff/1000x350.png?text=5" alt=""></div>
+      <div data-carousel="6" class="js-carousel_item"><img src="https://placehold.jp/fa28f0/ffffff/1000x350.png?text=6" alt=""></div>
+      <div data-carousel="7" class="js-carousel_item"><img src="https://placehold.jp/3d4070/ffffff/1000x350.png?text=7" alt=""></div>
+      <div data-carousel="8" class="js-carousel_item"><img src="https://placehold.jp/fa992a/ffffff/1000x350.png?text=8" alt=""></div>
+    </div>
+  </div>
+  <div class="js-prev">prev</div>
+  <div class="js-next">next</div>
+
+
+
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>
+    ///////////////////////////////////////////
+    //カスタマイズ変数
+    ///////////////////////////////////////////
+    //サムネイルの表示数
+    var carouselRow = 5;
+    //サムネイルのサイズ
+    var carouselItemW = 200;
+    ///////////////////////////////////////////
+
+    var $carousel = $('.js-carousel');
+    var $carouselList = $('.js-carousel_list');
+    var $carouselItem = $('.js-carousel_item');
+    var $prev = $('.js-prev');
+    var $next = $('.js-next');
+
+    var carouselItemL = $carouselItem.length;
+
+    var flag = false;
+
+
+    ///////////////////////////////////////////
+    //基盤のCSS
+    ///////////////////////////////////////////
+    $carouselItem.width(carouselItemW);
+    $carousel.width(carouselRow * carouselItemW);
+    $carouselList.css({
+      'width': (carouselItemL + 1) * carouselItemW + 'px',
+      'left': -carouselItemW + 'px',
+      'padding-left': carouselItemW + 'px'
+    });
+
+
+    ///////////////////////////////////////////
+    //スライドの選択
+    ///////////////////////////////////////////
+    function currentMove(e) {
+      $('.js-carousel_item').removeClass('is-current');
+      $('.js-carousel_item').eq(e).addClass('is-current');
+      var newCurrent = $('.js-carousel_item.is-current').data('carousel');
+      $('.js-slider_item').removeClass('is-current');
+      $('.js-slider_item').eq(newCurrent - 1).addClass('is-current');
+    }
+
+
+    ///////////////////////////////////////////
+    //左へ移動
+    ///////////////////////////////////////////
+    function leftS() {
+      if (!flag) {
+        flag = true;
+
+        //カレント移動
+        var nextCurrent = $('.js-carousel_item.is-current').index() + 1;
+        currentMove(nextCurrent);
+
+        $('.js-carousel_item:first-child').clone(true).insertAfter($('.js-carousel_item:last-child'));
+        $carouselList.animate({
+          paddingLeft: '0'
+        }, {
+          duration: 500,
+          complete: function() {
+            $('.js-carousel_item:first-child').remove();
+            $carouselList.css('padding-left', carouselItemW + 'px');
+            flag = false;
+          }
+        });
+      } else {
+        return false;
+      }
+    }
+
+    function left2S() {
+      if (!flag) {
+        flag = true;
+
+        //カレント移動
+        var nextCurrent = $('.js-carousel_item.is-current').index() + 2;
+        currentMove(nextCurrent);
+
+        $carouselList.css({
+          'width': (carouselItemL + 2) * carouselItemW + 'px',
+          'left': -carouselItemW * 2 + 'px',
+          'padding-left': carouselItemW * 2 + 'px'
+        });
+
+        $('.js-carousel_item:eq(0), .js-carousel_item:eq(1)').clone(true).insertAfter($('.js-carousel_item:last-child'));
+        $carouselList.animate({
+          paddingLeft: '0'
+        }, {
+          duration: 500,
+
+          complete: function() {
+            $('.js-carousel_item:eq(0), .js-carousel_item:eq(1)').remove();
+            $carouselList.css({
+              'width': (carouselItemL + 1) * carouselItemW + 'px',
+              'left': -carouselItemW + 'px',
+              'padding-left': carouselItemW + 'px'
+            });
+
+            flag = false;
+          }
+        });
+      } else {
+        return false;
+      }
+    }
+
+
+    ///////////////////////////////////////////
+    //右へ移動
+    ///////////////////////////////////////////
+    function rightS() {
+      if (!flag) {
+        flag = true;
+
+        //カレント移動
+        var nextCurrent = $('.js-carousel_item.is-current').index() - 1;
+        currentMove(nextCurrent);
+
+        $carouselList.css('padding-left', '0');
+        $('.js-carousel_item:last-child').clone(true).insertBefore($('.js-carousel_item:first-child'));
+        $carouselList.animate({
+          paddingLeft: carouselItemW + 'px'
+        }, {
+          duration: 500,
+          complete: function() {
+            $('.js-carousel_item:last-child').remove();
+            flag = false;
+          }
+        });
+      } else {
+        return false;
+      }
+    }
+
+    function right2S() {
+      if (!flag) {
+        flag = true;
+
+        //カレント移動
+        var nextCurrent = $('.js-carousel_item.is-current').index() - 2;
+        currentMove(nextCurrent);
+
+        $carouselList.css({
+          'width': (carouselItemL + 2) * carouselItemW + 'px',
+          'left': -carouselItemW * 2 + 'px',
+          'padding-left': 0
+        });
+
+        $('.js-carousel_item:nth-last-child(2), .js-carousel_item:last-child').clone(true).insertBefore($('.js-carousel_item:first-child'));
+        $carouselList.animate({
+          paddingLeft: carouselItemW * 2 + 'px'
+        }, {
+          duration: 500,
+
+          complete: function() {
+            $('.js-carousel_item:nth-last-child(2), .js-carousel_item:last-child').remove();
+            $carouselList.css({
+              'width': (carouselItemL + 1) * carouselItemW + 'px',
+              'left': -carouselItemW + 'px',
+              'padding-left': carouselItemW + 'px'
+            });
+
+            flag = false;
+          }
+        });
+      } else {
+        return false;
+      }
+    }
+
+
+    ///////////////////////////////////////////
+    //ループ処理
+    ///////////////////////////////////////////
+    var slideLoop;
+
+    //再生
+    function startTimer() {
+      slideLoop = setInterval(function() {
+        leftS();
+      }, 2500);
+    }
+
+    //停止
+    function stopTimer() {
+      clearInterval(slideLoop);
+    }
+
+
+    ///////////////////////////////////////////
+    //イベント
+    ///////////////////////////////////////////
+    //自動再生
+    startTimer();
+
+    //カルーセルクリック時
+    $carouselItem.on('click', function() {
+      stopTimer();
+      if ($(this).index() == 0) {
+        right2S();
+      } else if ($(this).index() == 1) {
+        rightS();
+      } else if ($(this).index() == 2) {
+        return false;
+      } else if ($(this).index() == 3) {
+        leftS();
+      } else if ($(this).index() == 4) {
+        left2S();
+      }
+      startTimer();
+    });
+
+    //次へボタンクリック時
+    $next.on('click', function() {
+      stopTimer();
+      leftS();
+      startTimer();
+    });
+
+    //前へボタンクリック時
+    $prev.on('click', function() {
+      stopTimer();
+      rightS();
+      startTimer();
+    });
+
+  </script>
+
+</body>
+
+</html>
